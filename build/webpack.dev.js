@@ -35,10 +35,7 @@ const devConfig = merge(commonConfig, {
     new webpack.HotModuleReplacementPlugin(),
     new FriendlyErrorsPlugin({
       compilationSuccessInfo: {
-        messages: [
-          `Local    ->  http://localhost:${PORT}/`,
-          `Network  ->  http://${localIP}:${PORT}/`
-        ]
+        messages: [`Local    ->  http://localhost:${PORT}/`, `Network  ->  http://${localIP}:${PORT}/`]
       },
       onErrors: (severity, errors) => {
         if (severity !== 'error') {

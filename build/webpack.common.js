@@ -5,18 +5,27 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const PurifyCssPlugin = require('purifycss-webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-
+const utils = require('./utils');
+const MIN_HTML_OPTS = {
+  removeComments: true,
+  collapseWhitespace: true,
+  removeRedundantAttributes: true,
+  useShortDoctype: true,
+  removeEmptyAttributes: true,
+  removeStyleLinkTypeAttributes: true,
+  keepClosingSlash: true,
+  minifyJS: true,
+  minifyCSS: true,
+  minifyURLs: true
+};
 const IS_DEV = process.env.NODE_ENV === 'development'; // 开发
 const IS_PRE = process.env.NODE_ENV === 'preproduction'; // 上测试
 const IS_PRO = process.env.NODE_ENV === 'production'; // 上线
 const myresolve = p => {
   return path.resolve(__dirname, p);
 };
-
 const webpackConfig = {
-  entry: {
-    index: myresolve('../src/js/index.js')
-  },
+  entry: utils.getEntry,
   output: {
     filename: 'js/[name].[contenthash:6].js',
     chunkFilename: 'js/[name].[contenthash:6].js',
@@ -108,25 +117,6 @@ const webpackConfig = {
     ]
   },
   plugins: [
-    // html依赖注入
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: 'src/index.html',
-      minify: IS_DEV
-        ? null
-        : {
-            removeComments: true,
-            collapseWhitespace: true,
-            removeRedundantAttributes: true,
-            useShortDoctype: true,
-            removeEmptyAttributes: true,
-            removeStyleLinkTypeAttributes: true,
-            keepClosingSlash: true,
-            minifyJS: true,
-            minifyCSS: true,
-            minifyURLs: true
-          }
-    }),
     // css提取
     new MiniCssExtractPlugin({
       filename: IS_DEV ? 'css/[name].css' : 'css/[name].[contenthash:6].css',
@@ -135,7 +125,7 @@ const webpackConfig = {
     // css tree-shaking
     new PurifyCssPlugin({
       minimize: true,
-      paths: glob.sync([path.join(__dirname, '../src/index.html'), path.join(__dirname, '../src/js/*.js')])
+      paths: glob.sync([path.join(__dirname, '../src/pages/**/*.html'), path.join(__dirname, '../src/pages/**/*.js')])
     }),
     new webpack.DefinePlugin({
       DEVELOPMENT: JSON.stringify(IS_DEV),
@@ -152,4 +142,17 @@ const webpackConfig = {
     ])
   ]
 };
+
+const tpls = utils.getTpl();
+for (const chunk in tpls) {
+  webpackConfig.plugins.unshift(
+    new HtmlWebpackPlugin({
+      chunks: [chunk, 'common', 'runtime'],
+      filename: `${chunk}.html`,
+      template: tpls[chunk],
+      minify: IS_DEV ? null : MIN_HTML_OPTS
+    })
+  );
+}
+
 module.exports = webpackConfig;

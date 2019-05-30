@@ -1,18 +1,15 @@
 // 添加样式依赖
 import '@/common/css/index.scss';
-import '@/css/index.scss';
+import './index.scss';
 // 添加js依赖
 import $ from 'zepto-webpack';
-import { cube, square } from './math';
-import print from './print';
+import { cube, square } from './js/math';
+import print from './js/print';
 import Api from '@/api';
-import defaults from 'lodash/defaults';
-
-console.log(defaults({ a: 1 }, { a: 3, b: 2 }));
 
 const $clickme = $('#clickme');
 const $txt = $('#txt');
-// $clickme.addClass('test');
+$clickme.addClass('test');
 $clickme.on('click', function() {
   if ($txt.css('display') !== 'none') {
     $txt.hide();
